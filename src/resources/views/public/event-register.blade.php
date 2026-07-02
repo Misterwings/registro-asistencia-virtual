@@ -350,6 +350,7 @@
                         </button>
                     </form>
                 </div>
+                <p class="mt-6 text-center text-xs font-medium uppercase tracking-[0.22em] text-warm-600"><strong>Aviso de privacidad:</strong> La información registrada en este formulario será utilizada exclusivamente para fines laborales y administrativos. La empresa garantiza el tratamiento confidencial de los datos personales conforme a la Ley 1581 de 2012, el Decreto 1074 de 2015 y su Política de Tratamiento de Datos Personales.</p>
             </div>
 
             <p class="mt-6 text-center text-xs font-medium uppercase tracking-[0.22em] text-warm-600">Sistema de Registro de Asistencia</p>

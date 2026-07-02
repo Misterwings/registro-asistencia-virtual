@@ -103,7 +103,17 @@ class ReportService
 
         $this->configurePdfFontPath();
 
-        $pdf = new Fpdf('L', 'mm', 'A4');
+        $pdf = new class ('L', 'mm', 'A4') extends Fpdf {
+            protected function Footer(): void
+            {
+                $this->SetY(-10);
+                $this->SetFont('Helvetica', '', 6.5);
+                $this->SetTextColor(90, 90, 90);
+                $text = 'Aviso de privacidad: La información registrada en este formulario será utilizada exclusivamente para fines laborales y administrativos. La empresa garantiza el tratamiento confidencial de los datos personales conforme a la Ley 1581 de 2012, el Decreto 1074 de 2015 y su Política de Tratamiento de Datos Personales.';
+                $converted = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $text);
+                $this->MultiCell(0, 3, $converted !== false ? $converted : '', 0, 'C');
+            }
+        };
         $this->registerImpactFont($pdf);
         $pdf->SetMargins(8, 8, 8);
         $pdf->SetAutoPageBreak(false);
