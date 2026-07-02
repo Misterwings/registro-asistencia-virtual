@@ -104,7 +104,7 @@ class ReportService
         $this->configurePdfFontPath();
 
         $pdf = new class ('L', 'mm', 'A4') extends Fpdf {
-            protected function Footer(): void
+            public function Footer(): void
             {
                 $this->SetY(-10);
                 $this->SetFont('Helvetica', '', 6.5);
