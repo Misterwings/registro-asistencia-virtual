@@ -70,8 +70,8 @@ class ReportController extends Controller
                         $event->topic,
                         $attendance->full_name,
                         $attendance->id_number,
-                        $attendance->position?->name ?? '',
-                        $attendance->headquarter?->name ?? '',
+                        $attendance->position_label ?? '',
+                        $attendance->headquarter_label ?? '',
                         $attendance->registered_at->format('Y-m-d H:i:s'),
                     ]);
                 }

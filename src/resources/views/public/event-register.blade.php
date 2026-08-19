@@ -281,32 +281,40 @@
                             </div>
 
                             <div>
-                                <label for="position_id"
+                                <label for="position"
                                     class="block text-sm font-medium text-navy-800 mb-1.5">Cargo</label>
-                                <select name="position_id" id="position_id"
-                                    class="form-control" aria-invalid="{{ $errors->has('position_id') ? 'true' : 'false' }}" @error('position_id') aria-describedby="position_id-error" @enderror>
-                                    <option value="" class="text-warm-400">Seleccionar cargo</option>
+                                <input type="text" name="position" id="position" list="position-options"
+                                    value="{{ old('position') }}" autocomplete="off"
+                                    placeholder="Seleccione o escriba un cargo"
+                                    aria-describedby="position-help{{ $errors->has('position') ? ' position-error' : '' }}"
+                                    aria-invalid="{{ $errors->has('position') ? 'true' : 'false' }}" class="form-control">
+                                <datalist id="position-options">
                                     @foreach ($positions as $position)
-                                        <option value="{{ $position->id }}" {{ old('position_id') == $position->id ? 'selected' : '' }}>{{ $position->name }}</option>
+                                        <option value="{{ $position->name }}"></option>
                                     @endforeach
-                                </select>
-                                @error('position_id')
-                                    <p id="position_id-error" class="field-error">{{ $message }}</p>
+                                </datalist>
+                                <p id="position-help" class="mt-1 text-xs text-warm-500">Seleccione un cargo o escriba uno personalizado.</p>
+                                @error('position')
+                                    <p id="position-error" class="field-error">{{ $message }}</p>
                                 @enderror
                             </div>
 
                             <div>
-                                <label for="headquarter_id"
+                                <label for="headquarter"
                                     class="block text-sm font-medium text-navy-800 mb-1.5">Sede</label>
-                                <select name="headquarter_id" id="headquarter_id"
-                                    class="form-control" aria-invalid="{{ $errors->has('headquarter_id') ? 'true' : 'false' }}" @error('headquarter_id') aria-describedby="headquarter_id-error" @enderror>
-                                    <option value="" class="text-warm-400">Seleccionar sede</option>
+                                <input type="text" name="headquarter" id="headquarter" list="headquarter-options"
+                                    value="{{ old('headquarter') }}" autocomplete="off"
+                                    placeholder="Seleccione o escriba una sede"
+                                    aria-describedby="headquarter-help{{ $errors->has('headquarter') ? ' headquarter-error' : '' }}"
+                                    aria-invalid="{{ $errors->has('headquarter') ? 'true' : 'false' }}" class="form-control">
+                                <datalist id="headquarter-options">
                                     @foreach ($headquarters as $headquarter)
-                                        <option value="{{ $headquarter->id }}" {{ old('headquarter_id') == $headquarter->id ? 'selected' : '' }}>{{ $headquarter->name }}</option>
+                                        <option value="{{ $headquarter->name }}"></option>
                                     @endforeach
-                                </select>
-                                @error('headquarter_id')
-                                    <p id="headquarter_id-error" class="field-error">{{ $message }}</p>
+                                </datalist>
+                                <p id="headquarter-help" class="mt-1 text-xs text-warm-500">Seleccione una sede o escriba una personalizada.</p>
+                                @error('headquarter')
+                                    <p id="headquarter-error" class="field-error">{{ $message }}</p>
                                 @enderror
                             </div>
                         </div>

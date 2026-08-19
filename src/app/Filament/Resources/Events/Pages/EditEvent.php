@@ -24,6 +24,12 @@ class EditEvent extends EditRecord
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data['directed_by_id'] = auth()->id();
+        $data['has_expiration'] = (bool) ($data['has_expiration'] ?? false);
+
+        if (! $data['has_expiration']) {
+            $data['expiration_date'] = null;
+        }
+
         return $data;
     }
 }

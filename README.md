@@ -167,6 +167,21 @@ docker compose run --rm app php artisan test
 
 PHPUnit is configured with an in-memory SQLite database (`phpunit.xml`). Test suites: Unit, Feature.
 
+## Despliegue en Coolify
+
+En Coolify se debe utilizar `docker-compose.coolify.yml` como archivo de Compose y configurar las variables sensibles en el entorno del recurso:
+
+- `APP_KEY`
+- `APP_URL`
+- `DB_DATABASE`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `DB_ROOT_PASSWORD`
+
+El contenedor de la aplicación ejecuta `php artisan migrate --force` antes de iniciar PHP-FPM. `RUN_MIGRATIONS` queda habilitada por defecto y solo debe establecerse en `false` si las migraciones se administran mediante un comando de despliegue independiente.
+
+El almacenamiento persistente de archivos adjuntos corresponde al volumen `public_storage`; la base de datos utiliza `db_data`. Ambos volúmenes deben conservarse entre despliegues.
+
 ## License
 
 This project is open-source software licensed under the [MIT license](https://opensource.org/licenses/MIT).

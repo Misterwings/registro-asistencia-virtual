@@ -75,6 +75,8 @@ return [
         'attachment_path' => 'archivo adjunto',
         'full_name' => 'nombre completo',
         'id_number' => 'número de identificación',
+        'position' => 'cargo',
+        'headquarter' => 'sede',
         'position_id' => 'cargo',
         'headquarter_id' => 'sede',
         'signature' => 'firma',

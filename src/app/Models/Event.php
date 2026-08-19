@@ -17,10 +17,14 @@ class Event extends Model
         'directed_by_position',
         'attachment_path',
         'slug',
+        'has_expiration',
+        'expiration_date',
     ];
 
     protected $casts = [
         'date' => 'date',
+        'has_expiration' => 'boolean',
+        'expiration_date' => 'date',
     ];
 
     public function directedBy()

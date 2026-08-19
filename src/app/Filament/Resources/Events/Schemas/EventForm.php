@@ -9,6 +9,8 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
 class EventForm
@@ -21,6 +23,15 @@ class EventForm
                 DatePicker::make('date')
                     ->label('Fecha')
                     ->required(),
+                Toggle::make('has_expiration')
+                    ->label('Activar vencimiento del enlace público')
+                    ->helperText('El enlace seguirá disponible durante toda la fecha seleccionada.')
+                    ->default(false)
+                    ->live(),
+                DatePicker::make('expiration_date')
+                    ->label('Fecha de vencimiento')
+                    ->visible(fn (Get $get): bool => (bool) $get('has_expiration'))
+                    ->required(fn (Get $get): bool => (bool) $get('has_expiration')),
                 TextInput::make('topic')
                     ->label('Tema')
                     ->required()
@@ -68,5 +79,4 @@ class EventForm
                 Hidden::make('slug'),
             ]);
     }
-
 }

@@ -16,6 +16,11 @@ class CreateEvent extends CreateRecord
 
         $eventService = app(EventService::class);
         $data['slug'] = $eventService->generateSlug($data['topic']);
+        $data['has_expiration'] = (bool) ($data['has_expiration'] ?? false);
+
+        if (! $data['has_expiration']) {
+            $data['expiration_date'] = null;
+        }
 
         return $data;
     }

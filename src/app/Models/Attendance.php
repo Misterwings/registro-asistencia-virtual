@@ -11,7 +11,9 @@ class Attendance extends Model
         'full_name',
         'id_number',
         'position_id',
+        'position_custom',
         'headquarter_id',
+        'headquarter_custom',
         'signature',
         'registered_at',
     ];
@@ -30,8 +32,18 @@ class Attendance extends Model
         return $this->belongsTo(Position::class);
     }
 
+    public function getPositionLabelAttribute(): ?string
+    {
+        return $this->position?->name ?? $this->position_custom;
+    }
+
     public function headquarter()
     {
         return $this->belongsTo(Headquarter::class);
+    }
+
+    public function getHeadquarterLabelAttribute(): ?string
+    {
+        return $this->headquarter?->name ?? $this->headquarter_custom;
     }
 }

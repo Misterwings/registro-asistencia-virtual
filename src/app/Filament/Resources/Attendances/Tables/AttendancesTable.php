@@ -28,9 +28,9 @@ class AttendancesTable
                 TextColumn::make('id_number')
                     ->label('Identificación')
                     ->searchable(),
-                TextColumn::make('position.name')
+                TextColumn::make('position_label')
                     ->label('Cargo'),
-                TextColumn::make('headquarter.name')
+                TextColumn::make('headquarter_label')
                     ->label('Sede'),
                 TextColumn::make('registered_at')
                     ->label('Fecha de registro')

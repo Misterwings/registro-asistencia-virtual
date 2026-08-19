@@ -26,6 +26,19 @@ class EventService
         return Event::where('slug', $slug)->first();
     }
 
+    public function isPublicLinkAvailable(Event $event): bool
+    {
+        if (! $event->has_expiration) {
+            return true;
+        }
+
+        if (! $event->expiration_date) {
+            return false;
+        }
+
+        return now('America/Bogota')->toDateString() <= $event->expiration_date->toDateString();
+    }
+
     public function getAttachmentUrl(Event $event): ?string
     {
         if (!$event->attachment_path) {

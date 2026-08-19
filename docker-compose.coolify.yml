@@ -20,6 +20,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-laravel}
       APP_KEY: ${APP_KEY}
       APP_URL: ${APP_URL}
+      RUN_MIGRATIONS: "${RUN_MIGRATIONS:-true}"
       QUEUE_CONNECTION: database
       CACHE_STORE: database
       SESSION_DRIVER: database

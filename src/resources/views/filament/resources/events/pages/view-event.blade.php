@@ -31,6 +31,16 @@
                     <dt class="text-xs font-semibold uppercase tracking-[0.16em] text-red-700">Asistencias registradas</dt>
                     <dd class="mt-1 text-2xl font-bold text-red-700">{{ $this->record->attendances()->count() }}</dd>
                 </div>
+                <div class="rounded-xl bg-warm-50 p-4">
+                    <dt class="text-xs font-semibold uppercase tracking-[0.16em] text-warm-600">Vencimiento del enlace</dt>
+                    <dd class="mt-1 font-semibold text-navy-900">
+                        @if ($this->record->has_expiration && $this->record->expiration_date)
+                            {{ $this->record->expiration_date->format('d/m/Y') }}
+                        @else
+                            Sin vencimiento
+                        @endif
+                    </dd>
+                </div>
                 <div class="rounded-xl bg-warm-50 p-4 sm:col-span-2 lg:col-span-3">
                     <dt class="text-xs font-semibold uppercase tracking-[0.16em] text-warm-600">Motivo</dt>
                     <dd class="mt-1 font-semibold text-navy-900">{{ $this->record->reason }}</dd>

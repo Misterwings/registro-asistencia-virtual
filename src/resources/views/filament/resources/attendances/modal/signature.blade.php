@@ -14,11 +14,11 @@
         </div>
         <div>
             <span class="font-medium text-gray-500">Cargo</span>
-            <p class="text-gray-800">{{ $record->position?->name }}</p>
+            <p class="text-gray-800">{{ $record->position_label }}</p>
         </div>
         <div>
             <span class="font-medium text-gray-500">Sede</span>
-            <p class="text-gray-800">{{ $record->headquarter?->name }}</p>
+            <p class="text-gray-800">{{ $record->headquarter_label }}</p>
         </div>
         <div>
             <span class="font-medium text-gray-500">Registrado</span>

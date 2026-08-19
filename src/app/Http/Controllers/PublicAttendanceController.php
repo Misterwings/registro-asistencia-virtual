@@ -22,6 +22,10 @@ class PublicAttendanceController extends Controller
             abort(404);
         }
 
+        if (!$this->eventService->isPublicLinkAvailable($event)) {
+            return $this->expiredResponse($event);
+        }
+
         $positions = \App\Models\Position::where('is_active', true)->orderBy('name')->get();
         $headquarters = \App\Models\Headquarter::where('is_active', true)->orderBy('name')->get();
 
@@ -42,11 +46,15 @@ class PublicAttendanceController extends Controller
             abort(404);
         }
 
+        if (!$this->eventService->isPublicLinkAvailable($event)) {
+            return $this->expiredResponse($event);
+        }
+
         $validated = $request->validate([
             'full_name' => ['required', 'string', 'max:255'],
             'id_number' => ['required', 'string', 'max:50'],
-            'position_id' => ['nullable', 'exists:positions,id'],
-            'headquarter_id' => ['nullable', 'exists:headquarters,id'],
+            'position' => ['nullable', 'string', 'max:255'],
+            'headquarter' => ['nullable', 'string', 'max:255'],
             'signature' => ['required', 'string'],
         ]);
 
@@ -59,5 +67,10 @@ class PublicAttendanceController extends Controller
         $this->attendanceService->register($validated, $event);
 
         return back()->with('success', '¡Asistencia registrada exitosamente!');
+    }
+
+    private function expiredResponse(Event $event)
+    {
+        return response()->view('public.event-expired', compact('event'), 410);
     }
 }

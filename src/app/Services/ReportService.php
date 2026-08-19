@@ -32,8 +32,8 @@ class ReportService
                 fputcsv($handle, [
                     $attendance->full_name,
                     $attendance->id_number,
-                    $attendance->position?->name ?? '',
-                    $attendance->headquarter?->name ?? '',
+                    $attendance->position_label ?? '',
+                    $attendance->headquarter_label ?? '',
                     $attendance->registered_at->format('Y-m-d'),
                 ]);
             }
@@ -73,8 +73,8 @@ class ReportService
             $writer->addRow([
                 $attendance->full_name,
                 $attendance->id_number,
-                $attendance->position?->name ?? '',
-                $attendance->headquarter?->name ?? '',
+                $attendance->position_label ?? '',
+                $attendance->headquarter_label ?? '',
                 $attendance->registered_at->format('Y-m-d'),
             ]);
         }
@@ -470,8 +470,8 @@ class ReportService
             (string) $rowNumber,
             $attendance?->full_name ?? '',
             $attendance?->id_number ?? '',
-            $attendance?->position?->name ?? '',
-            $attendance?->headquarter?->name ?? '',
+            $attendance?->position_label ?? '',
+            $attendance?->headquarter_label ?? '',
         ];
 
         $pdf->SetDrawColor(0, 0, 0);

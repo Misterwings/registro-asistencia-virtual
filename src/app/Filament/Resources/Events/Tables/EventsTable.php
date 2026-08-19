@@ -36,6 +36,11 @@ class EventsTable
                     ->label('Lugar')
                     ->searchable()
                     ->limit(30),
+                TextColumn::make('expiration_date')
+                    ->label('Vence el')
+                    ->date('d/m/Y')
+                    ->placeholder('Sin vencimiento')
+                    ->sortable(),
                 TextColumn::make('attendances_count')
                     ->label('Asistencias')
                     ->counts('attendances')
