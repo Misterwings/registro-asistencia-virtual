@@ -22,8 +22,8 @@ class PublicAttendanceTest extends TestCase
         $headquarter = Headquarter::create(['name' => 'Sede Norte', 'is_active' => true]);
 
         $response = $this->post(route('event.register', $event->slug), $this->attendancePayload([
-            'position' => '  analista   contable ',
-            'headquarter' => 'sede norte',
+            'position_id' => $position->id,
+            'headquarter_id' => $headquarter->id,
         ]));
 
         $response->assertRedirect();
@@ -33,46 +33,90 @@ class PublicAttendanceTest extends TestCase
         $this->assertNull($attendance->position_custom);
         $this->assertSame($headquarter->id, $attendance->headquarter_id);
         $this->assertNull($attendance->headquarter_custom);
+        $this->assertSame('Persona de prueba', $attendance->full_name);
         $this->assertSame('Analista Contable', $attendance->position_label);
         $this->assertSame('Sede Norte', $attendance->headquarter_label);
     }
 
-    public function test_custom_values_are_saved_on_the_attendance(): void
+    public function test_custom_values_are_not_accepted_for_a_new_attendance(): void
     {
         $event = $this->createEvent();
 
         $response = $this->post(route('event.register', $event->slug), $this->attendancePayload([
+            'position_id' => null,
+            'headquarter_id' => null,
             'position' => 'Cargo Temporal',
             'headquarter' => 'Sede Temporal',
         ]));
 
-        $response->assertRedirect();
-        $attendance = Attendance::firstOrFail();
-
-        $this->assertNull($attendance->position_id);
-        $this->assertSame('Cargo Temporal', $attendance->position_custom);
-        $this->assertNull($attendance->headquarter_id);
-        $this->assertSame('Sede Temporal', $attendance->headquarter_custom);
-        $this->assertSame('Cargo Temporal', $attendance->position_label);
-        $this->assertSame('Sede Temporal', $attendance->headquarter_label);
+        $response->assertSessionHasErrors(['position_id', 'headquarter_id']);
+        $this->assertDatabaseCount('attendances', 0);
     }
 
-    public function test_blank_catalog_fields_are_stored_as_null(): void
+    public function test_names_and_surnames_are_required(): void
     {
         $event = $this->createEvent();
 
         $response = $this->post(route('event.register', $event->slug), $this->attendancePayload([
-            'position' => '   ',
-            'headquarter' => '',
+            'first_names' => '',
+            'last_names' => '',
+        ]));
+
+        $response->assertSessionHasErrors(['first_names', 'last_names']);
+        $this->assertDatabaseCount('attendances', 0);
+    }
+
+    public function test_identification_is_normalized_before_registration(): void
+    {
+        $event = $this->createEvent();
+
+        $response = $this->post(route('event.register', $event->slug), $this->attendancePayload([
+            'id_number' => '1.149.303.038',
         ]));
 
         $response->assertRedirect();
-        $attendance = Attendance::firstOrFail();
+        $this->assertDatabaseHas('attendances', [
+            'id_number' => '1149303038',
+        ]);
+    }
 
-        $this->assertNull($attendance->position_id);
-        $this->assertNull($attendance->position_custom);
-        $this->assertNull($attendance->headquarter_id);
-        $this->assertNull($attendance->headquarter_custom);
+    public function test_identification_with_letters_is_rejected(): void
+    {
+        $event = $this->createEvent();
+
+        $response = $this->post(route('event.register', $event->slug), $this->attendancePayload([
+            'id_number' => '1149303038A',
+        ]));
+
+        $response->assertSessionHasErrors('id_number');
+        $this->assertDatabaseCount('attendances', 0);
+    }
+
+    public function test_same_identification_cannot_register_twice_for_the_same_event(): void
+    {
+        $event = $this->createEvent();
+        $payload = $this->attendancePayload(['id_number' => '1149303038']);
+
+        $this->post(route('event.register', $event->slug), $payload)->assertRedirect();
+
+        $response = $this->post(route('event.register', $event->slug), array_merge($payload, [
+            'id_number' => '1 149 303 038',
+        ]));
+
+        $response->assertSessionHasErrors('id_number');
+        $this->assertDatabaseCount('attendances', 1);
+    }
+
+    public function test_same_identification_can_register_for_a_different_event(): void
+    {
+        $firstEvent = $this->createEvent();
+        $secondEvent = $this->createEvent(['slug' => 'evento-segundo-' . uniqid()]);
+        $payload = $this->attendancePayload(['id_number' => '1149303038']);
+
+        $this->post(route('event.register', $firstEvent->slug), $payload)->assertRedirect();
+        $this->post(route('event.register', $secondEvent->slug), $payload)->assertRedirect();
+
+        $this->assertDatabaseCount('attendances', 2);
     }
 
     public function test_public_link_remains_available_on_its_expiration_date(): void
@@ -140,11 +184,21 @@ class PublicAttendanceTest extends TestCase
 
     private function attendancePayload(array $overrides = []): array
     {
+        $position = Position::firstOrCreate(
+            ['name' => 'Cargo de prueba'],
+            ['is_active' => true]
+        );
+        $headquarter = Headquarter::firstOrCreate(
+            ['name' => 'Sede de prueba'],
+            ['is_active' => true]
+        );
+
         return array_merge([
-            'full_name' => 'Persona de prueba',
-            'id_number' => uniqid('id-'),
-            'position' => null,
-            'headquarter' => null,
+            'first_names' => 'Persona',
+            'last_names' => 'de prueba',
+            'id_number' => (string) random_int(1000000000, 1999999999),
+            'position_id' => $position->id,
+            'headquarter_id' => $headquarter->id,
             'signature' => 'data:image/png;base64,c2lnbmF0dXJl',
         ], $overrides);
     }

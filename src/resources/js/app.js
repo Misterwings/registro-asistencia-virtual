@@ -8,7 +8,44 @@ document.addEventListener('DOMContentLoaded', () => {
         requestAnimationFrame(() => focusTarget.focus());
     }
 
+    const headquartersSelector = document.querySelector('[data-headquarter-selector]');
+
+    if (headquartersSelector) {
+        const checkboxes = [...headquartersSelector.querySelectorAll('input[name="headquarter_ids[]"]')];
+        const status = headquartersSelector.querySelector('#headquarter-selection-status');
+        const selectAllButton = headquartersSelector.querySelector('[data-select-all-headquarters]');
+        const clearButton = headquartersSelector.querySelector('[data-clear-headquarters]');
+
+        function updateHeadquarterStatus() {
+            const selectedCount = checkboxes.filter((checkbox) => checkbox.checked).length;
+
+            if (!status) return;
+
+            status.textContent = selectedCount
+                ? `${selectedCount} sede${selectedCount === 1 ? '' : 's'} seleccionada${selectedCount === 1 ? '' : 's'}.`
+                : 'No se seleccionó ninguna sede: se incluirán todas.';
+        }
+
+        selectAllButton?.addEventListener('click', () => {
+            checkboxes.forEach((checkbox) => {
+                checkbox.checked = true;
+            });
+            updateHeadquarterStatus();
+        });
+
+        clearButton?.addEventListener('click', () => {
+            checkboxes.forEach((checkbox) => {
+                checkbox.checked = false;
+            });
+            updateHeadquarterStatus();
+        });
+
+        checkboxes.forEach((checkbox) => checkbox.addEventListener('change', updateHeadquarterStatus));
+        updateHeadquarterStatus();
+    }
+
     const canvas = document.getElementById('signatureCanvas');
+
     if (!canvas) return;
 
     const signatureInput = document.getElementById('signatureInput');
@@ -17,9 +54,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('attendanceForm');
     const placeholder = document.getElementById('signaturePlaceholder');
     const statusEl = document.getElementById('signatureStatus');
-    const fullNameInput = document.getElementById('full_name');
+    const firstNamesInput = document.getElementById('first_names');
+    const lastNamesInput = document.getElementById('last_names');
     const signatureFrame = canvas.closest('.signature-frame');
     let typedSignatureName = null;
+
+    function getParticipantName() {
+        return [firstNamesInput?.value.trim(), lastNamesInput?.value.trim()]
+            .filter(Boolean)
+            .join(' ');
+    }
 
     const signaturePad = new SignaturePad(canvas, {
         backgroundColor: 'rgba(0,0,0,0)',
@@ -132,11 +176,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     useTypedSignatureBtn?.addEventListener('click', () => {
-        const name = fullNameInput?.value.trim();
+        const firstNames = firstNamesInput?.value.trim();
+        const lastNames = lastNamesInput?.value.trim();
+        const name = getParticipantName();
 
-        if (!name) {
-            setStatus('Escriba su nombre completo antes de generar la firma.', true);
-            fullNameInput?.focus();
+        if (!firstNames || !lastNames) {
+            setStatus('Escriba sus nombres y apellidos antes de generar la firma.', true);
+            (firstNames ? lastNamesInput : firstNamesInput)?.focus();
             return;
         }
 

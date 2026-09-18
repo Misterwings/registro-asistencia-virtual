@@ -12,6 +12,12 @@
 <body class="ambient-shell min-h-screen font-sans antialiased">
     <a href="#contenido-principal" class="skip-link">Saltar al formulario</a>
 
+    @php
+        $selectedHeadquarterIds = collect(request('headquarter_ids', request('headquarter_id') ? [request('headquarter_id')] : []))
+            ->map(fn ($id) => (string) $id)
+            ->all();
+    @endphp
+
     <main id="contenido-principal" tabindex="-1" class="relative z-10 flex min-h-screen items-center justify-center px-4 py-10 sm:px-6">
         <div class="surface-card reveal grid w-full max-w-4xl overflow-hidden rounded-[1.75rem] lg:grid-cols-[0.9fr_1.1fr]" style="--reveal-delay: 80ms;">
             <aside class="relative overflow-hidden bg-navy-900 p-8 text-white sm:p-10" aria-labelledby="report-title">
@@ -21,7 +27,7 @@
                     <div>
                         <span class="inline-flex rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.22em] text-gold-300">Reportes</span>
                         <h1 id="report-title" class="mt-5 font-serif text-4xl leading-tight">Descarga de asistencias</h1>
-                        <p class="mt-4 text-sm leading-6 text-white/70">Filtre por evento y, si lo necesita, por sede. Si deja la sede vacía, se exportarán todas las asistencias del evento seleccionado.</p>
+                        <p class="mt-4 text-sm leading-6 text-white/70">Filtre por evento y seleccione una o varias sedes. Si no marca ninguna, se exportarán todas las asistencias del evento seleccionado.</p>
                     </div>
 
                     <div class="grid gap-3 text-sm">
@@ -31,7 +37,7 @@
                         </div>
                         <div class="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
                             <span class="block text-white/50">Filtro opcional</span>
-                            <strong class="mt-1 block text-lg">Sede de asistencia</strong>
+                            <strong class="mt-1 block text-lg">Una o varias sedes</strong>
                         </div>
                     </div>
                 </div>
@@ -70,20 +76,34 @@
                         @enderror
                     </div>
 
-                    <div>
-                        <label for="headquarter_id" class="mb-2 block text-sm font-semibold text-navy-800">Sede</label>
-                        <select name="headquarter_id" id="headquarter_id" class="form-control" aria-invalid="{{ $errors->has('headquarter_id') ? 'true' : 'false' }}" @error('headquarter_id') aria-describedby="headquarter_id-error" @enderror>
-                            <option value="">Todas las sedes</option>
+                    <fieldset data-headquarter-selector @error('headquarter_ids') aria-describedby="headquarter_ids-error" @enderror>
+                        <legend class="mb-2 block text-sm font-semibold text-navy-800">Sedes</legend>
+                        <p class="mb-3 text-xs leading-5 text-warm-600">Puede seleccionar varias sedes. Si no marca ninguna, se incluirán todas.</p>
+
+                        <div class="mb-3 flex flex-wrap gap-2">
+                            <button type="button" data-select-all-headquarters class="secondary-action px-3 py-2 text-xs">
+                                Seleccionar todas
+                            </button>
+                            <button type="button" data-clear-headquarters class="secondary-action px-3 py-2 text-xs">
+                                Limpiar selección
+                            </button>
+                        </div>
+
+                        <div id="headquarter-options" class="grid max-h-64 gap-2 overflow-y-auto rounded-xl border border-warm-200 bg-warm-50/60 p-3 sm:grid-cols-2" role="group" aria-label="Sedes disponibles">
                             @foreach ($headquarters as $headquarter)
-                                <option value="{{ $headquarter->id }}" {{ request('headquarter_id') == $headquarter->id ? 'selected' : '' }}>
-                                    {{ $headquarter->name }}
-                                </option>
+                                <label class="flex cursor-pointer items-center gap-3 rounded-lg border border-transparent bg-white px-3 py-2 text-sm text-navy-800 transition hover:border-gold-300 hover:bg-gold-50">
+                                    <input type="checkbox" name="headquarter_ids[]" value="{{ $headquarter->id }}"
+                                        {{ in_array((string) $headquarter->id, $selectedHeadquarterIds, true) ? 'checked' : '' }}
+                                        class="h-4 w-4 rounded border-warm-300 text-red-600 focus:ring-red-500">
+                                    <span>{{ $headquarter->name }}</span>
+                                </label>
                             @endforeach
-                        </select>
-                        @error('headquarter_id')
-                            <p id="headquarter_id-error" class="field-error">{{ $message }}</p>
+                        </div>
+                        <p id="headquarter-selection-status" class="mt-2 text-xs font-medium text-warm-600" role="status" aria-live="polite"></p>
+                        @error('headquarter_ids')
+                            <p id="headquarter_ids-error" class="field-error">{{ $message }}</p>
                         @enderror
-                    </div>
+                    </fieldset>
 
                     <fieldset @error('format') aria-describedby="format-error" @enderror>
                         <legend class="mb-3 block text-sm font-semibold text-navy-800">Formato</legend>

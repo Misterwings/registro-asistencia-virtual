@@ -9,6 +9,8 @@ class Attendance extends Model
     protected $fillable = [
         'event_id',
         'full_name',
+        'first_names',
+        'last_names',
         'id_number',
         'position_id',
         'position_custom',

@@ -87,10 +87,10 @@ A Laravel-based attendance registration system with Docker support. Features pub
 
 ## Key Features
 
-- **Public Event Registration:** Attendees register via a public form (`/evento/{slug}`) with digital signature capture.
+- **Public Event Registration:** Attendees register via a public form (`/evento/{slug}`) with separate names and surnames, normalized numeric identification, catalog-based headquarters and positions, and digital signature capture.
 - **Admin Dashboard:** Filament-powered admin panel for managing events, attendance records, positions, headquarters, and reasons.
 - **QR Code Generation:** For event check-in or quick access links.
-- **CSV Export:** Attendance reports filtered by event (`/admin/reportes/asistencias?event_id=`).
+- **Attendance Reports:** XLSX and PDF reports can be filtered by event and multiple headquarters (`headquarter_ids[]`).
 - **PDF Reports:** Generated with DOMPDF and FPDF.
 - **Spanish UI:** All interface labels and validation messages in Spanish.
 - **Soft Disabling:** Positions, headquarters, and reasons can be soft-disabled via `is_active` boolean.

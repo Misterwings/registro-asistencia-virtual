@@ -4,53 +4,25 @@ namespace App\Services;
 
 use App\Models\Attendance;
 use App\Models\Event;
-use App\Models\Headquarter;
-use App\Models\Position;
 use Illuminate\Support\Collection;
 
 class AttendanceService
 {
     public function register(array $data, Event $event): Attendance
     {
-        $position = $this->normalizeValue($data['position'] ?? null);
-        $headquarter = $this->normalizeValue($data['headquarter'] ?? null);
+        $firstNames = $this->normalizeValue($data['first_names'] ?? null);
+        $lastNames = $this->normalizeValue($data['last_names'] ?? null);
 
-        $positionId = $this->resolveCatalogId(Position::class, $position);
-        $headquarterId = $this->resolveCatalogId(Headquarter::class, $headquarter);
-
-        unset($data['position'], $data['headquarter']);
-
-        $data['position_id'] = $positionId;
-        $data['position_custom'] = $positionId ? null : $position;
-        $data['headquarter_id'] = $headquarterId;
-        $data['headquarter_custom'] = $headquarterId ? null : $headquarter;
+        $data['first_names'] = $firstNames;
+        $data['last_names'] = $lastNames;
+        $data['full_name'] = trim(implode(' ', array_filter([$firstNames, $lastNames])));
+        $data['id_number'] = $this->normalizeIdNumber($data['id_number'] ?? null);
+        $data['position_custom'] = null;
+        $data['headquarter_custom'] = null;
         $data['event_id'] = $event->id;
         $data['registered_at'] = now();
 
         return Attendance::create($data);
-    }
-
-    private function resolveCatalogId(string $modelClass, ?string $value): ?int
-    {
-        $canonicalValue = $this->canonicalValue($value);
-
-        if ($canonicalValue === null) {
-            return null;
-        }
-
-        $record = $modelClass::query()
-            ->where('is_active', true)
-            ->get(['id', 'name'])
-            ->first(fn ($record) => $this->canonicalValue($record->name) === $canonicalValue);
-
-        return $record?->id;
-    }
-
-    private function canonicalValue(?string $value): ?string
-    {
-        $value = $this->normalizeValue($value);
-
-        return $value === null ? null : mb_strtolower($value, 'UTF-8');
     }
 
     private function normalizeValue(?string $value): ?string
@@ -64,10 +36,17 @@ class AttendanceService
         return preg_replace('/\s+/', ' ', $value) ?? $value;
     }
 
+    public function normalizeIdNumber(?string $value): string
+    {
+        $value = trim((string) $value);
+
+        return preg_replace('/(?<=[0-9])[.\-\s]+(?=[0-9])/', '', $value) ?? $value;
+    }
+
     public function isAlreadyRegistered(Event $event, string $idNumber): bool
     {
         return Attendance::where('event_id', $event->id)
-            ->where('id_number', $idNumber)
+            ->where('id_number', $this->normalizeIdNumber($idNumber))
             ->exists();
     }
 

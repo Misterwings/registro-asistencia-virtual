@@ -24,24 +24,35 @@ class ReportController extends Controller
             return view('reports.form', compact('events', 'headquarters'));
         }
 
+        if (! $request->has('headquarter_ids') && $request->filled('headquarter_id')) {
+            $request->merge([
+                'headquarter_ids' => [$request->query('headquarter_id')],
+            ]);
+        }
+
         $request->validate([
             'event_id' => 'required|exists:events,id',
             'format' => 'required|in:xlsx,pdf',
-            'headquarter_id' => 'nullable|exists:headquarters,id',
+            'headquarter_ids' => 'nullable|array',
+            'headquarter_ids.*' => 'integer|distinct|exists:headquarters,id',
         ]);
 
         $event = Event::where('id', $request->query('event_id'))
             ->where('directed_by_id', auth()->id())
             ->firstOrFail();
-        $headquarterId = $request->filled('headquarter_id')
-            ? (int) $request->query('headquarter_id')
-            : null;
+        $headquarterIds = collect($request->query('headquarter_ids', []))
+            ->filter(fn ($id) => $id !== null && $id !== '')
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
+
+        $headquarterIds = $headquarterIds !== [] ? $headquarterIds : null;
 
         if ($request->query('format') === 'xlsx') {
-            return $this->reportService->exportXlsx($event, $headquarterId);
+            return $this->reportService->exportXlsx($event, $headquarterIds);
         }
 
-        return $this->reportService->exportPdf($event, $headquarterId);
+        return $this->reportService->exportPdf($event, $headquarterIds);
     }
 
     public function exportCsv(Request $request)

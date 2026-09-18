@@ -23,6 +23,7 @@ class HeadquarterSeeder extends Seeder
             ['name' => 'Pance', 'is_active' => true],
             ['name' => 'San Fernando', 'is_active' => true],
             ['name' => 'Unicentro', 'is_active' => true],
+            ['name' => 'ENTIDAD EXTERNA', 'is_active' => true],
         ];
 
         foreach ($headquarters as $headquarter) {

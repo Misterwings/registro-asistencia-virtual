@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Services\AttendanceService;
 use App\Services\EventService;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class PublicAttendanceController extends Controller
 {
@@ -50,12 +52,27 @@ class PublicAttendanceController extends Controller
             return $this->expiredResponse($event);
         }
 
+        $request->merge([
+            'id_number' => $this->attendanceService->normalizeIdNumber($request->input('id_number')),
+        ]);
+
         $validated = $request->validate([
-            'full_name' => ['required', 'string', 'max:255'],
-            'id_number' => ['required', 'string', 'max:50'],
-            'position' => ['nullable', 'string', 'max:255'],
-            'headquarter' => ['nullable', 'string', 'max:255'],
+            'first_names' => ['required', 'string', 'max:255'],
+            'last_names' => ['required', 'string', 'max:255'],
+            'id_number' => ['required', 'string', 'max:50', 'regex:/\A[0-9]+\z/'],
+            'position_id' => [
+                'required',
+                'integer',
+                Rule::exists('positions', 'id')->where(fn ($query) => $query->where('is_active', true)),
+            ],
+            'headquarter_id' => [
+                'required',
+                'integer',
+                Rule::exists('headquarters', 'id')->where(fn ($query) => $query->where('is_active', true)),
+            ],
             'signature' => ['required', 'string'],
+        ], [
+            'id_number.regex' => 'El número de identificación solo puede contener números.',
         ]);
 
         if ($this->attendanceService->isAlreadyRegistered($event, $validated['id_number'])) {
@@ -64,7 +81,21 @@ class PublicAttendanceController extends Controller
             ])->withInput();
         }
 
-        $this->attendanceService->register($validated, $event);
+        try {
+            $this->attendanceService->register($validated, $event);
+        } catch (QueryException $exception) {
+            $errorCode = (int) ($exception->errorInfo[1] ?? 0);
+            $isUniqueViolation = in_array($errorCode, [19, 1062], true)
+                || str_contains(strtolower($exception->getMessage()), 'unique');
+
+            if (! $isUniqueViolation) {
+                throw $exception;
+            }
+
+            return back()->withErrors([
+                'id_number' => 'Ya has registrado tu asistencia a este evento anteriormente.',
+            ])->withInput();
+        }
 
         return back()->with('success', '¡Asistencia registrada exitosamente!');
     }
